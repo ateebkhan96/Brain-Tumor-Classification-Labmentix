@@ -124,7 +124,18 @@ def get_transform(input_size=224):
 def load_model(model_type):
     try:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        model_path = f"models/{'resnet50' if model_type == 'ResNet50' else 'custom_cnn'}_brain_tumor.pth"
+        
+        # Updated model paths to match your GitHub repository
+        if model_type == "ResNet50":
+            model_path = "models/best_ResNet50.pth"
+        else:
+            model_path = "models/best_CustomCNN.pth"
+        
+        # Check if model file exists
+        if not os.path.exists(model_path):
+            st.error(f"Model file not found: {model_path}")
+            st.info("Please ensure the model files are in the correct directory.")
+            return None, None, None, None
 
         checkpoint = torch.load(model_path, map_location=device)
         saved_class_names = checkpoint.get('class_names', ['Glioma', 'Meningioma', 'No Tumor', 'Pituitary'])
@@ -166,7 +177,12 @@ def main():
     with st.sidebar:
         st.header("🔧 Model Configuration")
         model_type = st.selectbox("Select Model", ["ResNet50", "Custom CNN"])
-        st.info(f"📁 Using model: `models/{'resnet50' if model_type == 'ResNet50' else 'custom_cnn'}_brain_tumor.pth`")
+        
+        # Updated info display
+        if model_type == "ResNet50":
+            st.info(f"📁 Using model: `models/best_ResNet50.pth`")
+        else:
+            st.info(f"📁 Using model: `models/best_CustomCNN.pth`")
 
         st.markdown('<div class="model-info">', unsafe_allow_html=True)
         if model_type == "ResNet50":
@@ -211,7 +227,7 @@ def main():
         )
         if uploaded_file is not None:
             image = Image.open(uploaded_file).convert('RGB')
-            st.image(image, caption="Uploaded MRI Image", use_column_width=True)
+            st.image(image, caption="Uploaded MRI Image", use_container_width=True)
             st.markdown(f"""
             **Image Details:**
             - Size: {image.size[0]} x {image.size[1]} pixels
